@@ -55,12 +55,13 @@ let store: QuotaStore | undefined
 
 export function getQuotaStore(): QuotaStore {
   if (store) return store
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  // Vercel Marketplace's Upstash integration injects KV_REST_API_* names.
+  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
   if (url && token) {
     store = new RedisStore(new Redis({ url, token }))
   } else if (process.env.NODE_ENV === "production") {
-    throw new Error("UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production")
+    throw new Error("Upstash Redis env (UPSTASH_REDIS_REST_URL/TOKEN or KV_REST_API_URL/TOKEN) is required in production")
   } else {
     console.warn("[quota] Upstash not configured; using in-memory quota (dev only)")
     store = new MemoryStore()
