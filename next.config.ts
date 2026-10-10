@@ -1,9 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
+import path from "path"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  outputFileTracingRoot: path.join(__dirname),
   turbopack: {
     rules: {
       "*.css": {
@@ -12,6 +14,6 @@ const nextConfig: NextConfig = {
       },
     },
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
