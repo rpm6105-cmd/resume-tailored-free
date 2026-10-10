@@ -1,10 +1,11 @@
-"use client"
-
-import dynamic from "next/dynamic"
-import { Sparkles } from "lucide-react"
+import type { Metadata } from "next"
 import PrivacyBanner from "@/components/shared/privacy-banner"
+import TailorLoader from "./tailor-loader"
 
-const TailorContent = dynamic(() => import("@/components/tailor/tailor-content"), { ssr: false, loading: () => null })
+export const metadata: Metadata = {
+  title: "Workspace",
+  description: "Upload your resume, paste a job description, and get an ATS-friendly tailored rewrite.",
+}
 
 export default function TailorPage() {
   return (
@@ -12,11 +13,7 @@ export default function TailorPage() {
       <PrivacyBanner />
       <div className="bg-[#f7f6f2]">
         <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-          <div className="mb-8 flex flex-col justify-between gap-4 border-b border-[#dce1da] pb-6 sm:flex-row sm:items-end">
-            <div><p className="flex items-center gap-2 text-sm font-semibold text-[#d65540]"><Sparkles className="size-4" /> Resume workspace</p><h1 className="mt-2 text-3xl font-semibold tracking-tight">Tailor for one specific role.</h1><p className="mt-2 text-sm text-muted-foreground">Upload your source material, add the opportunity, and review every change.</p></div>
-            <p className="text-xs font-medium text-muted-foreground">Step 1 of 3 · Source material</p>
-          </div>
-          <TailorContent />
+          <TailorLoader />
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { FilePenLine, Sparkles } from "lucide-react"
+import { FilePenLine } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import AuthButton from "./auth-button"
 
 export default function Navbar() {
   return (
@@ -12,7 +13,7 @@ export default function Navbar() {
         </Link>
         <nav className="flex items-center gap-1">
           <Link href="/tailor"><Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">Workspace</Button></Link>
-          <Link href="/login"><Button size="sm" className="bg-[#e8654c] px-3 text-white hover:bg-[#f17a63]"><Sparkles className="size-3.5" /> Sign in</Button></Link>
+          <AuthButton />
         </nav>
       </div>
     </header>

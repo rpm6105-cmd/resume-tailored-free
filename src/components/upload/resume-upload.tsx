@@ -6,6 +6,7 @@ import { parseDocx } from "@/lib/parsers/docx-parser"
 import { parseText } from "@/lib/parsers/text-parser"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { LIMITS } from "@/lib/limits"
 
 type Props = {
   onTextExtracted: (text: string, fileName: string, fileSize: number) => void
@@ -18,8 +19,7 @@ export default function ResumeUpload({ onTextExtracted }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = async (file: File) => {
-    const max = 5 * 1024 * 1024
-    if (file.size > max) {
+    if (file.size > LIMITS.fileMaxBytes) {
       toast.error("File too large (max 5MB)")
       return
     }
@@ -38,9 +38,14 @@ export default function ResumeUpload({ onTextExtracted }: Props) {
         toast.error("Unsupported file type (.pdf, .docx, .txt)")
         return
       }
-      setText(parsed)
-      onTextExtracted(parsed, file.name, file.size)
-      toast.success("Resume text extracted")
+      if (parsed.length < LIMITS.resumeMin) {
+        toast.error("We found very little text in that file. Try another version or paste the text.")
+        return
+      }
+      const clipped = parsed.slice(0, LIMITS.resumeMax)
+      setText(clipped)
+      onTextExtracted(clipped, file.name, file.size)
+      toast.success(parsed.length > LIMITS.resumeMax ? "Resume extracted (trimmed to 20,000 characters)" : "Resume text extracted")
     } catch (error) {
       const message = error instanceof Error ? error.message : ""
       if (message.includes("selectable text")) {
@@ -68,6 +73,10 @@ export default function ResumeUpload({ onTextExtracted }: Props) {
         onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
         onDragLeave={() => setDragActive(false)}
         onDrop={onDrop}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload resume file"
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click() } }}
         className={`cursor-pointer border border-dashed border-[#aab6af] bg-[#fbfcfa] p-8 text-center transition-colors ${dragActive ? "bg-[#e8ece8]" : "hover:bg-[#f3f5f1]"}`}
         onClick={() => inputRef.current?.click()}
       >
@@ -76,8 +85,9 @@ export default function ResumeUpload({ onTextExtracted }: Props) {
         <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = "" }} />
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-semibold">Or paste resume text</label>
-        <Textarea rows={8} className="bg-[#fbfcfa]" value={text} onChange={(e) => { setText(e.target.value); onTextExtracted(e.target.value, "pasted", e.target.value.length) }} placeholder="Paste your resume here..." />
+        <label htmlFor="resume-text" className="text-sm font-semibold">Or paste resume text</label>
+        <Textarea id="resume-text" rows={8} maxLength={LIMITS.resumeMax} className="bg-[#fbfcfa]" value={text} onChange={(e) => { setText(e.target.value); onTextExtracted(e.target.value, "pasted", e.target.value.length) }} placeholder="Paste your resume here..." />
+        <p className="text-xs text-muted-foreground">{text.length.toLocaleString()} / {LIMITS.resumeMax.toLocaleString()} characters</p>
       </div>
     </div>
   )

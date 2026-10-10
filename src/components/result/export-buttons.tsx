@@ -1,28 +1,53 @@
 "use client"
 
+import { useState } from "react"
+import { Download, Printer } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { downloadPdf } from "@/lib/export/pdf"
-import { downloadDocx } from "@/lib/export/docx"
 
 type Props = {
   text: string
 }
 
+type Format = "pdf" | "docx"
+
 export default function ExportButtons({ text }: Props) {
-  const handlePdf = async () => {
-    await downloadPdf(text)
+  const [busy, setBusy] = useState<Format | null>(null)
+
+  const run = async (format: Format) => {
+    if (!text.trim()) return
+    setBusy(format)
+    try {
+      if (format === "pdf") {
+        const { downloadPdf } = await import("@/lib/export/pdf")
+        downloadPdf(text)
+      } else {
+        const { downloadDocx } = await import("@/lib/export/docx")
+        await downloadDocx(text)
+      }
+    } catch {
+      toast.error(`Could not create the ${format.toUpperCase()} file. Please try again.`)
+    } finally {
+      setBusy(null)
+    }
   }
-  const handleDocx = async () => {
-    await downloadDocx(text)
+
+  const handlePrint = async () => {
+    const { printResume } = await import("@/lib/export/print")
+    printResume(text)
   }
-  const handlePrint = () => {
-    window.print()
-  }
+
   return (
     <div className="flex flex-wrap gap-2">
-      <Button onClick={handlePdf}>Download PDF</Button>
-      <Button onClick={handleDocx} variant="secondary">Download DOCX</Button>
-      <Button onClick={handlePrint} variant="outline">Print to PDF</Button>
+      <Button onClick={() => run("pdf")} disabled={busy !== null} className="bg-[#e8654c] text-white hover:bg-[#f17a63]">
+        <Download className="size-4" /> {busy === "pdf" ? "Preparing..." : "Download PDF"}
+      </Button>
+      <Button onClick={() => run("docx")} disabled={busy !== null} variant="secondary">
+        <Download className="size-4" /> {busy === "docx" ? "Preparing..." : "Download DOCX"}
+      </Button>
+      <Button onClick={handlePrint} variant="outline">
+        <Printer className="size-4" /> Print
+      </Button>
     </div>
   )
 }

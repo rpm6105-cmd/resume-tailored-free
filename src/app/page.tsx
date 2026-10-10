@@ -38,8 +38,8 @@ export default function Home() {
       </section>
       <section className="bg-white py-20">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-[1fr_0.85fr] lg:px-8">
-          <div className="border-l-2 border-[#e8654c] pl-6"><FileText className="size-5 text-[#e8654c]" /><h2 className="mt-6 text-3xl font-semibold tracking-tight">Built to help, not embellish.</h2><p className="mt-4 max-w-xl text-lg leading-8 text-muted-foreground">Your resume stays yours. Suggestions focus on clearer wording and role alignment without fabricating experience, achievements, or skills.</p></div>
-          <ul className="space-y-4 text-sm font-medium">{["Your source material remains in your browser", "Single-column, ATS-conscious output", "Edit before every export"].map(item => <li key={item} className="flex items-center gap-3 border-b pb-4"><span className="grid size-6 place-items-center rounded-full bg-[#e8ece8] text-[#2f7965]"><Check className="size-3.5" /></span>{item}</li>)}</ul>
+          <div className="border-l-2 border-[#e8654c] pl-6"><FileText className="size-5 text-[#e8654c]" /><h2 className="mt-6 text-3xl font-semibold tracking-tight">Built to help, not embellish.</h2><p className="mt-4 max-w-xl text-lg leading-8 text-muted-foreground">Your resume stays yours. Files are read in your browser, and the text sent for the rewrite is never saved. Suggestions focus on clearer wording and role alignment without fabricating experience, achievements, or skills.</p></div>
+          <ul className="space-y-4 text-sm font-medium">{["Files are read in your browser; resume text is never stored", "Single-column, ATS-conscious output", "Edit before every export"].map(item => <li key={item} className="flex items-center gap-3 border-b pb-4"><span className="grid size-6 place-items-center rounded-full bg-[#e8ece8] text-[#2f7965]"><Check className="size-3.5" /></span>{item}</li>)}</ul>
         </div>
       </section>
     </div>
