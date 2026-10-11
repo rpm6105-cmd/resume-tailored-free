@@ -47,4 +47,9 @@ describe("isEmailAllowed", () => {
     expect(isEmailAllowed("other@gmail.com", list)).toBe(false)
     expect(isEmailAllowed(undefined, list)).toBe(false)
   })
+  it("tolerates spaces, semicolons, newlines and quotes", () => {
+    const list = `"a@x.com"; b@y.com\n  <c@z.com>  d@w.com`
+    for (const email of ["a@x.com", "B@Y.com", "c@z.com", "d@w.com"]) expect(isEmailAllowed(email, list)).toBe(true)
+    expect(isEmailAllowed("e@v.com", list)).toBe(false)
+  })
 })
