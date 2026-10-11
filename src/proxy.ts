@@ -1,12 +1,13 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
+import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/auth/supabase-env"
 
 /** Refreshes the Supabase session cookie on navigation so server routes see a valid user. */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = SUPABASE_URL
+  const key = SUPABASE_KEY
   if (!url || !key) return response
 
   const supabase = createServerClient(url, key, {
