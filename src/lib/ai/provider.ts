@@ -45,7 +45,14 @@ async function generateWithAnthropic(env: ServerEnv, { system, user }: Prompt): 
     return { ok: true, text, provider: "anthropic" }
   } catch (e) {
     if (e instanceof Anthropic.APIConnectionTimeoutError) return { ok: false, reason: "timeout" }
-    if (e instanceof Anthropic.APIError) return { ok: false, reason: "provider", status: e.status, detail: e.name }
+    if (e instanceof Anthropic.APIError) {
+      // Anthropic's error type/message describe the request (e.g. auth, params), never the resume text.
+      const body = e.error as { error?: { type?: string; message?: string } } | undefined
+      const detail = [body?.error?.type, body?.error?.message?.slice(0, 300), e.requestID && `request_id=${e.requestID}`]
+        .filter(Boolean)
+        .join(" | ")
+      return { ok: false, reason: "provider", status: e.status, detail: detail || e.name }
+    }
     return { ok: false, reason: "provider", detail: e instanceof Error ? e.name : "unknown" }
   }
 }
