@@ -6,19 +6,9 @@ import { getServerEnv } from "@/lib/utils/env"
 import { consumeQuota } from "@/lib/rate-limit/quota"
 import { SYSTEM_PROMPT, buildRewritePrompt } from "@/lib/ai/system-prompt"
 import { cleanModelOutput, findUnverifiedFacts, validateRewrite } from "@/lib/ai/output"
-import { siteConfig } from "@/lib/site"
+import { generateText } from "@/lib/ai/provider"
 
-export const maxDuration = 60
-
-const AI_TIMEOUT_MS = 55_000
-
-type OpenRouterResponse = {
-  choices?: Array<{
-    finish_reason?: string
-    message?: { content?: string }
-  }>
-  error?: { message?: string; code?: number }
-}
+export const maxDuration = 90
 
 function errorResponse(error: string, status: number, extra?: Record<string, unknown>) {
   return NextResponse.json({ error, ...extra }, { status, headers: { "Cache-Control": "no-store" } })
@@ -81,50 +71,27 @@ export async function POST(request: Request) {
     return errorResponse(message, 429, { resetAt: quota.resetAt })
   }
 
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS)
-
   try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": siteConfig.url,
-        "X-Title": siteConfig.fullName,
-      },
-      body: JSON.stringify({
-        model: env.OPENROUTER_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildRewritePrompt(resumeText, jobDescription) },
-        ],
-        temperature: 0.25,
-        top_p: 0.9,
-        max_tokens: 8000,
-      }),
-      signal: controller.signal,
-    })
+    const result = await generateText(env, { system: SYSTEM_PROMPT, user: buildRewritePrompt(resumeText, jobDescription) })
 
-    const data = (await res.json().catch(() => ({}))) as OpenRouterResponse
-    if (!res.ok || data.error) {
+    if (!result.ok) {
       await quota.refund()
-      logFailure("provider error", { status: res.status, code: data.error?.code })
-      return errorResponse("The AI service is busy right now. Your free credit was not used. Please try again.", 502)
+      logFailure(`ai ${result.reason}`, { status: result.status, detail: result.detail })
+      const messages: Record<typeof result.reason, [string, number]> = {
+        truncated: ["The rewrite was cut off because the resume is very long. Try trimming older roles and retry.", 422],
+        refusal: ["The AI couldn't process this resume. Your free credit was not used. Please review the text and try again.", 422],
+        timeout: ["The AI took too long to respond. Your free credit was not used. Please try again.", 504],
+        provider: ["The AI service is busy right now. Your free credit was not used. Please try again.", 502],
+      }
+      const [message, status] = messages[result.reason]
+      return errorResponse(message, status)
     }
 
-    const choice = data.choices?.[0]
-    if (choice?.finish_reason === "length") {
-      await quota.refund()
-      logFailure("output truncated")
-      return errorResponse("The rewrite was cut off because the resume is very long. Try trimming older roles and retry.", 422)
-    }
-
-    const rewritten = cleanModelOutput(choice?.message?.content ?? "")
+    const rewritten = cleanModelOutput(result.text)
     const problem = validateRewrite(rewritten, resumeText)
     if (problem) {
       await quota.refund()
-      logFailure("invalid output", { problem })
+      logFailure("invalid output", { problem, provider: result.provider })
       return errorResponse("The AI returned an unusable result. Your free credit was not used. Please try again.", 502)
     }
 
@@ -138,13 +105,7 @@ export async function POST(request: Request) {
     )
   } catch (e) {
     await quota.refund()
-    if (e instanceof Error && e.name === "AbortError") {
-      logFailure("timeout")
-      return errorResponse("The AI took too long to respond. Your free credit was not used. Please try again.", 504)
-    }
     logFailure("unexpected", { name: e instanceof Error ? e.name : "unknown" })
     return errorResponse("Something went wrong. Your free credit was not used. Please try again.", 500)
-  } finally {
-    clearTimeout(timeout)
   }
 }

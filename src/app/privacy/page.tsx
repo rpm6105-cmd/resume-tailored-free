@@ -81,8 +81,12 @@ export default function PrivacyPage() {
         <li><strong>Vercel</strong>: website hosting and delivery.</li>
         <li><strong>Supabase</strong>: account authentication and the usage-limit database.</li>
         <li>
-          <strong>OpenRouter</strong> and the AI model provider it routes to (currently Google Gemini): generating the rewrite from the text you
-          submit, under their own terms. See{" "}
+          <strong>Anthropic</strong> (Claude AI models): generating the rewrite from the text you submit. Anthropic does not use data sent
+          through its commercial API to train its models by default. See{" "}
+          <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noreferrer">Anthropic&apos;s privacy policy</a>.
+        </li>
+        <li>
+          <strong>OpenRouter</strong>: a backup AI gateway we may use if our primary AI provider is unavailable. See{" "}
           <a href="https://openrouter.ai/privacy" target="_blank" rel="noreferrer">OpenRouter&apos;s privacy policy</a>.
         </li>
         <li><strong>Resend</strong>: delivering sign-in emails.</li>

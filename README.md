@@ -7,7 +7,7 @@ Privacy-first AI resume tailoring. Upload or paste a resume, paste a job descrip
 ## How it works
 
 - **Parsing in the browser**: PDF (pdf.js), DOCX (mammoth) and TXT files are read client-side. The file never leaves the device.
-- **AI rewrite**: only the extracted text and job description are sent to `/api/rewrite`, which forwards them to OpenRouter (model fixed server-side). Nothing is persisted or logged.
+- **AI rewrite**: only the extracted text and job description are sent to `/api/rewrite`, which sends them to Claude via the Anthropic API (or OpenRouter as a fallback; model fixed server-side). Nothing is persisted or logged.
 - **Fabrication check**: numbers, emails and links in the rewrite that don't appear in the original are flagged for the user to verify.
 - **Export in the browser**: text-based PDF (jsPDF, selectable and ATS-parseable), DOCX (docx), and a clean print view.
 - **Auth**: Supabase email magic link or code. An optional `ALLOWED_EMAILS` list restricts sign-in to invited testers.
@@ -15,7 +15,7 @@ Privacy-first AI resume tailoring. Upload or paste a resume, paste a job descrip
 
 ## Tech stack
 
-Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (Base UI), Supabase (`@supabase/ssr`), Upstash Redis, OpenRouter, Vitest.
+Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (Base UI), Supabase (`@supabase/ssr`), Anthropic Claude (`@anthropic-ai/sdk`), Vitest.
 
 ## Setup
 
@@ -25,7 +25,7 @@ Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, Tailwind CSS v4, shad
    - *Authentication → Email Templates → Magic Link*: add `{{ .Token }}` to the template so users can type the code (needed when they open the email on a different device).
    - The built-in Supabase email sender has a very low hourly limit. Configure custom SMTP (e.g. Resend) before inviting testers.
 3. **Quota store**: apply `supabase/migrations/*.sql` to your Supabase project and set `SUPABASE_SERVICE_ROLE_KEY` (Vercel's Supabase integration sets it). Upstash Redis is an optional alternative. Dev falls back to an in-memory counter.
-4. **OpenRouter**: create an API key. In OpenRouter privacy settings, consider disabling providers that train on or retain prompts.
+4. **AI**: set `ANTHROPIC_API_KEY` (from console.anthropic.com) and optionally `ANTHROPIC_MODEL` (default `claude-haiku-5-5`). OpenRouter (`OPENROUTER_API_KEY`) is used only when no Anthropic key is set.
 
 ## Private beta checklist
 
