@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState, useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowUpRight, MailCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -71,6 +72,12 @@ export default function LoginForm({ next, linkError }: { next: string; linkError
       <Button type="submit" className="h-11 w-full bg-[#e8654c] text-white hover:bg-[#f17a63]" disabled={sending}>
         {sending ? "Sending..." : <>Send sign-in link <ArrowUpRight className="size-4" /></>}
       </Button>
+      <p className="text-xs leading-5 text-muted-foreground">
+        By continuing, you confirm you are 18 or older and agree to our{" "}
+        <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">Terms of Use</Link> and{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>, including AI processing of the
+        resume text you submit.
+      </p>
     </form>
   )
 }

@@ -7,9 +7,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#18211f] text-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight" aria-label="ResumeAI by SoftSync Lab, home">
           <span className="grid size-8 place-items-center rounded-lg bg-[#e8654c] text-white"><FilePenLine className="size-4" /></span>
-          <span>Resume Tailor</span>
+          <span className="flex flex-col leading-none">
+            <span>ResumeAI</span>
+            <span className="mt-0.5 text-[10px] font-medium tracking-wide text-white/55">by SoftSync Lab</span>
+          </span>
         </Link>
         <nav className="flex items-center gap-1">
           <Link href="/tailor"><Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">Workspace</Button></Link>

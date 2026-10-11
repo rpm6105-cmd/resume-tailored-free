@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": siteConfig.url,
-        "X-Title": siteConfig.name,
+        "X-Title": siteConfig.fullName,
       },
       body: JSON.stringify({
         model: env.OPENROUTER_MODEL,

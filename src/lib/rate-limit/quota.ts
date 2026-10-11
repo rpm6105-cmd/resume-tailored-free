@@ -1,4 +1,6 @@
 import { Redis } from "@upstash/redis"
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { getSupabaseAdmin } from "@/lib/auth/supabase-admin"
 
 /**
  * Daily quota with fixed UTC-day windows. Unlike a sliding-window limiter,
@@ -23,6 +25,25 @@ class RedisStore implements QuotaStore {
   }
   async get(key: string) {
     return Number((await this.redis.get<number>(key)) ?? 0)
+  }
+}
+
+/** Counters in Supabase Postgres via service-role RPCs (see supabase/migrations). */
+class SupabaseStore implements QuotaStore {
+  constructor(private db: SupabaseClient) {}
+  async incr(key: string, ttlSeconds: number) {
+    const { data, error } = await this.db.rpc("quota_incr", { p_key: key, p_ttl_seconds: ttlSeconds })
+    if (error) throw new Error(`quota_incr failed: ${error.message}`)
+    return Number(data)
+  }
+  async decr(key: string) {
+    const { error } = await this.db.rpc("quota_decr", { p_key: key })
+    if (error) throw new Error(`quota_decr failed: ${error.message}`)
+  }
+  async get(key: string) {
+    const { data, error } = await this.db.rpc("quota_get", { p_key: key })
+    if (error) throw new Error(`quota_get failed: ${error.message}`)
+    return Number(data ?? 0)
   }
 }
 
@@ -58,12 +79,15 @@ export function getQuotaStore(): QuotaStore {
   // Vercel Marketplace's Upstash integration injects KV_REST_API_* names.
   const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
+  const supabase = getSupabaseAdmin()
   if (url && token) {
     store = new RedisStore(new Redis({ url, token }))
+  } else if (supabase) {
+    store = new SupabaseStore(supabase)
   } else if (process.env.NODE_ENV === "production") {
-    throw new Error("Upstash Redis env (UPSTASH_REDIS_REST_URL/TOKEN or KV_REST_API_URL/TOKEN) is required in production")
+    throw new Error("No quota store: set SUPABASE_SERVICE_ROLE_KEY (or Upstash Redis env) in production")
   } else {
-    console.warn("[quota] Upstash not configured; using in-memory quota (dev only)")
+    console.warn("[quota] No Redis or Supabase service key; using in-memory quota (dev only)")
     store = new MemoryStore()
   }
   return store

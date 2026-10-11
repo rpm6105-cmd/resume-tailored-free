@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ArrowUpRight, Check, FileText, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PrivacyBanner from "@/components/shared/privacy-banner"
+import { siteConfig } from "@/lib/site"
 
 const steps = [
   ["01", "Bring your resume", "Upload a PDF or DOCX, or simply paste your current text."],
@@ -20,10 +21,15 @@ export default function Home() {
         <div className="relative mx-auto flex min-h-[calc(100svh-6.5rem)] max-w-7xl items-center px-5 py-16 lg:px-8">
           <div className="max-w-2xl">
             <div className="hero-reveal mb-6 inline-flex items-center gap-2 border border-white/20 bg-white/8 px-3 py-1.5 text-xs font-semibold tracking-[0.14em] text-[#f6c5b8] uppercase"><Sparkles className="size-3.5" /> AI resume studio</div>
-            <p className="hero-reveal text-sm font-medium text-white/65">Resume Tailor</p>
+            <p className="hero-reveal text-sm font-medium text-white/65">ResumeAI by SoftSync Lab</p>
             <h1 className="hero-reveal text-balance mt-3 text-5xl font-semibold leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">A sharper resume for the role you actually want.</h1>
             <p className="hero-reveal-delay mt-7 max-w-xl text-lg leading-8 text-white/75">Bring your experience. We help you find the language, proof, and keywords that make it easier for the right recruiter to see your value.</p>
-            <div className="hero-reveal-delay mt-9 flex flex-wrap items-center gap-3">
+            <ul className="hero-reveal-delay mt-6 flex flex-wrap gap-2" aria-label="Features">
+              {siteConfig.tagline.map((t) => (
+                <li key={t} className="border border-white/20 bg-white/8 px-2.5 py-1 text-xs font-medium text-white/80">{t}</li>
+              ))}
+            </ul>
+            <div className="hero-reveal-delay mt-8 flex flex-wrap items-center gap-3">
               <Link href="/tailor"><Button size="lg" className="h-11 bg-[#e8654c] px-5 text-white hover:bg-[#f17a63]">Tailor my resume <ArrowUpRight className="size-4" /></Button></Link>
               <span className="text-sm text-white/60">Free to try. No card required.</span>
             </div>

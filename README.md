@@ -1,4 +1,6 @@
-# Resume Tailor
+# ResumeAI by SoftSync Lab
+
+AI Resume Builder • ATS Optimization • Job Description Matching • AI Rewriting
 
 Privacy-first AI resume tailoring. Upload or paste a resume, paste a job description, and get an ATS-friendly rewrite that never invents facts. Nothing is stored.
 
@@ -9,7 +11,7 @@ Privacy-first AI resume tailoring. Upload or paste a resume, paste a job descrip
 - **Fabrication check**: numbers, emails and links in the rewrite that don't appear in the original are flagged for the user to verify.
 - **Export in the browser**: text-based PDF (jsPDF, selectable and ATS-parseable), DOCX (docx), and a clean print view.
 - **Auth**: Supabase email magic link or code. An optional `ALLOWED_EMAILS` list restricts sign-in to invited testers.
-- **Quota**: per-user and per-IP daily limits in Upstash Redis (UTC day windows). Failed AI calls are refunded. IPs are stored only as salted hashes.
+- **Quota**: per-user and per-IP daily limits stored in Supabase Postgres (`supabase/migrations`), or Upstash Redis if configured. Failed AI calls are refunded. IPs are stored only as salted hashes.
 
 ## Tech stack
 
@@ -22,7 +24,7 @@ Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, Tailwind CSS v4, shad
    - *Authentication → URL Configuration*: set Site URL to your app URL, and add `http://localhost:3000/auth/confirm` plus `https://<your-domain>/auth/confirm` to Redirect URLs.
    - *Authentication → Email Templates → Magic Link*: add `{{ .Token }}` to the template so users can type the code (needed when they open the email on a different device).
    - The built-in Supabase email sender has a very low hourly limit. Configure custom SMTP (e.g. Resend) before inviting testers.
-3. **Upstash**: create a Redis database and copy the REST URL and token. Required in production; dev falls back to an in-memory counter.
+3. **Quota store**: apply `supabase/migrations/*.sql` to your Supabase project and set `SUPABASE_SERVICE_ROLE_KEY` (Vercel's Supabase integration sets it). Upstash Redis is an optional alternative. Dev falls back to an in-memory counter.
 4. **OpenRouter**: create an API key. In OpenRouter privacy settings, consider disabling providers that train on or retain prompts.
 
 ## Private beta checklist

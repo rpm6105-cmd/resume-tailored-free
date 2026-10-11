@@ -10,14 +10,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: { default: "Resume Tailor · Free AI resume tailoring", template: "%s · Resume Tailor" },
+  title: { default: `${siteConfig.fullName} · AI Resume Builder & ATS Optimization`, template: `%s · ${siteConfig.name}` },
   description: siteConfig.description,
-  applicationName: siteConfig.name,
+  applicationName: siteConfig.fullName,
   robots: siteConfig.indexable ? { index: true, follow: true } : { index: false, follow: false },
   openGraph: {
     type: "website",
-    siteName: siteConfig.name,
-    title: "Resume Tailor · Free AI resume tailoring",
+    siteName: siteConfig.fullName,
+    title: `${siteConfig.fullName} · AI Resume Builder & ATS Optimization`,
     description: siteConfig.description,
     url: "/",
     images: [{ url: "/images/resume-desk.png", alt: "A printed resume on a professional desk" }],

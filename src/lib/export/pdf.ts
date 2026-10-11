@@ -91,7 +91,7 @@ export function buildResumePdf(text: string): jsPDF {
   })
 
   const name = blocks.find((b) => b.type === "name")?.text
-  doc.setProperties({ title: name ? `${toPdfSafeText(name)} - Resume` : "Resume", creator: "Resume Tailor" })
+  doc.setProperties({ title: name ? `${toPdfSafeText(name)} - Resume` : "Resume", creator: "ResumeAI by SoftSync Lab" })
   return doc
 }
 

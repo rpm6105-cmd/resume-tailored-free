@@ -27,7 +27,7 @@ export function buildResumeDocx(text: string): Document {
   })
 
   return new Document({
-    creator: "Resume Tailor",
+    creator: "ResumeAI by SoftSync Lab",
     title: "Resume",
     styles: {
       default: { document: { run: { font: FONT, size: 20 } } },
